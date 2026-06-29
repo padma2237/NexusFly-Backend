@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Welcome to NexusFly</h1>
+    <p>Your AI assistant is online!</p>
+</body>
+</html>
+
+
+
+<button onclick="testAI()">Test AI Connection</button>
+
+<script>
+  async function testAI() {
+    try {
+      
+      // Use a variable for the base URL
+const BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000' 
+    : 'https://your-render-app-name.onrender.com';
+
+const response = await fetch(`${BASE_URL}/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Hello' }] }] })
+      });
+      const data = await response.json();
+      // This will show the response in a popup
+      alert('AI Response: ' + JSON.stringify(data)); 
+    } catch (error) {
+      // This will show errors in a popup
+      alert('Error: ' + error.message);
+    }
+  }
+</script>
