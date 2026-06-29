@@ -29,10 +29,19 @@ app.post('/ask', async (req, res) => {
 }
         );
         res.json(response.data);
-    } catch (error) {
-        console.error("Error:", error.response ? error.response.data : error.message);
-        res.status(500).json({ error: "Failed to connect to AI" });
-    }
+
+        
+        
+          } catch (error) {
+    // This will show up in your Render Logs tab
+    console.error("Full API Error:", JSON.stringify(error.response ? error.response.data : error.message, null, 2));
+    res.status(500).json({ error: "Failed to connect to AI" });
+}
+        
+        
+        
+        
+        
 });
 
 const PORT = process.env.PORT || 3000;
