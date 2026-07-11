@@ -37,28 +37,30 @@ app.post('/ask', async (req, res) => {
       const searchResults = await searchWeb(userQuery);
 
       const searchContext = `
-Live Web Search Results:
+      Live Web Search Results:
 
-${searchResults.results
-  .map(
-    (r, i) => `${i + 1}. ${r.title}
-URL: ${r.url}
-Summary: ${r.content}`
-  )
-  .join("\n\n")}
+      ${searchResults.results
+      .map(
+        (r, i) => `${i + 1}. ${r.title}
+        URL: ${r.url}
+        Summary: ${r.content}`
+      )
+      .join("\n\n")}
 
-Answer the user's question using the search results above.
+      Answer the user's question using the search results above.
 
-User Question:
-${userQuery}
-`;
+      User Question:
+      ${userQuery}
+      `;
 
-      finalContents = [{
+      finalContents = [...contents];
+
+      finalContents[finalContents.length - 1] = {
         role: "user",
         parts: [{
           text: searchContext
         }]
-      }];
+      };
     }
 
     const requestBody = {
