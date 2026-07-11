@@ -3,6 +3,9 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const app = express();
+const {
+  searchWeb
+} = require("./services/webSearch");
 
 app.use(cors());
 app.use(express.json());
@@ -16,56 +19,80 @@ app.get('/', (req, res) => {
 });
 
 app.post('/ask', async (req, res) => {
-    try {
+  try {
 
-        const { contents, webSearch } = req.body;
+    const {
+      contents, webSearch
+    } = req.body;
 
-        console.log("Web Search:", webSearch);
-        
-        
+    console.log("Web Search:", webSearch);
 
-        const requestBody = {
-    system_instruction: {
-        parts: [
-            {
-                text: "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively."
-            }
-        ]
-    },
-    contents
-};
 
-// Only enable Google Search when the toggle is ON
-if (webSearch) {
-    requestBody.tools = [
-        {
-            google_search: {}
-        }
-    ];
-}
+    let finalContents = contents;
 
-const response = await axios.post(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.API_KEY}`,
-    requestBody
-);
+    if (webSearch) {
+      const userQuery =
+      contents[contents.length - 1]?.parts?.[0]?.text || "";
 
-        res.json(response.data);
+      const searchResults = await searchWeb(userQuery);
 
-    } catch (error) {
+      const searchContext = `
+Live Web Search Results:
 
-        console.error(
-            "Full API Error:",
-            JSON.stringify(
-                error.response ? error.response.data : error.message,
-                null,
-                2
-            )
-        );
+${searchResults.results
+  .map(
+    (r, i) => `${i + 1}. ${r.title}
+URL: ${r.url}
+Summary: ${r.content}`
+  )
+  .join("\n\n")}
 
-        res.status(500).json({
-            error: "Failed to connect to AI"
-        });
+Answer the user's question using the search results above.
+
+User Question:
+${userQuery}
+`;
+
+      finalContents = [{
+        role: "user",
+        parts: [{
+          text: searchContext
+        }]
+      }];
     }
+
+    const requestBody = {
+      system_instruction: {
+        parts: [{
+          text: "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively."
+        }]
+      },
+      contents: finalContents
+    };
+
+
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.API_KEY}`,
+      requestBody
+    );
+
+    res.json(response.data);
+
+  } catch (error) {
+
+    console.error(
+      "Full API Error:",
+      JSON.stringify(
+        error.response ? error.response.data: error.message,
+        null,
+        2
+      )
+    );
+
+    res.status(500).json({
+      error: "Failed to connect to AI"
+    });
+  }
 });
 
 
