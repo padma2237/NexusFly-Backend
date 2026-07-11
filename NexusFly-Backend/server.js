@@ -21,20 +21,33 @@ app.post('/ask', async (req, res) => {
         const { contents, webSearch } = req.body;
 
         console.log("Web Search:", webSearch);
+        
+        
 
-        const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.API_KEY}`,
+        const requestBody = {
+    system_instruction: {
+        parts: [
             {
-                system_instruction: {
-                    parts: [
-                        {
-                            text: "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively."
-                        }
-                    ]
-                },
-                contents: contents
+                text: "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively."
             }
-        );
+        ]
+    },
+    contents
+};
+
+// Only enable Google Search when the toggle is ON
+if (webSearch) {
+    requestBody.tools = [
+        {
+            google_search: {}
+        }
+    ];
+}
+
+const response = await axios.post(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.API_KEY}`,
+    requestBody
+);
 
         res.json(response.data);
 
