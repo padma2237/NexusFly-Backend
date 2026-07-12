@@ -27,6 +27,7 @@ app.post('/ask', async (req, res) => {
 
     console.log("Web Search:", webSearch);
 
+    let searchResults = null;
 
     let finalContents = contents;
 
@@ -34,7 +35,7 @@ app.post('/ask', async (req, res) => {
       const userQuery =
       contents[contents.length - 1]?.parts?.[0]?.text || "";
 
-      const searchResults = await searchWeb(userQuery);
+      searchResults = await searchWeb(userQuery);
 
       const searchContext = `
       Live Web Search Results:
@@ -78,7 +79,22 @@ app.post('/ask', async (req, res) => {
       requestBody
     );
 
-    res.json(response.data);
+    const answer =
+    response.data?.candidates?.[0]?.content?.parts?.[0]?.text ??
+    "No response.";
+
+const sources =
+  webSearch && searchResults?.results
+    ? searchResults.results.map(result => ({
+        title: result.title,
+        url: result.url,
+      }))
+    : [];
+
+    res.json({
+      answer,
+      sources
+    });
 
   } catch (error) {
 
