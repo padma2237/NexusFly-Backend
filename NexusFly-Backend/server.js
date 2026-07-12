@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const axios = require('axios');
 const cors = require('cors');
 const app = express();
 const {
@@ -74,14 +73,22 @@ app.post('/ask', async (req, res) => {
     };
 
 
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.API_KEY}`,
-      requestBody
-    );
+    const response = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.API_KEY}`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody),
+  }
+);
 
-    const answer =
-    response.data?.candidates?.[0]?.content?.parts?.[0]?.text ??
-    "No response.";
+const data = await response.json();
+
+  const answer =
+data?.candidates?.[0]?.content?.parts?.[0]?.text ??
+"No response.";
 
 const sources =
   webSearch && searchResults?.results
@@ -95,22 +102,24 @@ const sources =
       answer,
       sources
     });
+    
 
   } catch (error) {
+  console.error("Full API Error:");
 
-    console.error(
-      "Full API Error:",
-      JSON.stringify(
-        error.response ? error.response.data: error.message,
-        null,
-        2
-      )
-    );
-
-    res.status(500).json({
-      error: "Failed to connect to AI"
-    });
+  if (error instanceof Error) {
+    console.error(error.message);
+  } else {
+    console.error(error);
   }
+
+  res.status(500).json({
+    error: "Failed to connect to AI",
+  });
+}
+  
+  
+  
 });
 
 
