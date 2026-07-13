@@ -74,84 +74,50 @@ app.post('/ask', async (req, res) => {
 
 
     const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.API_KEY}`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  }
-);
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${process.env.API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
 
-const data = await response.json();
+    const data = await response.json();
 
-  const answer =
-data?.candidates?.[0]?.content?.parts?.[0]?.text ??
-"No response.";
+    const answer =
+    data?.candidates?.[0]?.content?.parts?.[0]?.text ??
+    "No response.";
 
-const sources =
-  webSearch && searchResults?.results
+    const sources =
+    webSearch && searchResults?.results
     ? searchResults.results.map(result => ({
-        title: result.title,
-        url: result.url,
-      }))
-    : [];
+      title: result.title,
+      url: result.url,
+    })): [];
 
     res.json({
       answer,
       sources
     });
-    
+
 
   } catch (error) {
-  console.error("Full API Error:");
+    console.error("Full API Error:");
 
-  if (error instanceof Error) {
-    console.error(error.message);
-  } else {
-    console.error(error);
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error(error);
+    }
+
+    res.status(500).json({
+      error: "Failed to connect to AI",
+    });
   }
 
-  res.status(500).json({
-    error: "Failed to connect to AI",
-  });
-}
-  
 });
-
-
-
-app.post("/ask-stream", async (req, res) => {
-  console.log("🚀 /ask-stream called");
-  res.setHeader("Content-Type", "text/plain");
-  
-  
-  
-  res.setHeader("Cache-Control", "no-cache");
-res.setHeader("Connection", "keep-alive");
-
-
-
-
-  res.setHeader("Transfer-Encoding", "chunked");
-  
-console.log("📤 Sending: Hello");
-  res.write("Hello ");
-  
-  setTimeout(() => {
-    console.log("📤 Sending: from");
-    res.write("from ");
-  }, 1000);
-
-  setTimeout(() => {
-    console.log("📤 Sending: NexusFly!");
-    res.write("NexusFly!");
-    res.end();
-  }, 2000);
-});
-
-
 
 
 const PORT = process.env.PORT || 3000;
