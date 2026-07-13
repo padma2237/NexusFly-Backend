@@ -135,14 +135,17 @@ res.setHeader("Connection", "keep-alive");
 
 
   res.setHeader("Transfer-Encoding", "chunked");
-
+  
+console.log("📤 Sending: Hello");
   res.write("Hello ");
   
   setTimeout(() => {
+    console.log("📤 Sending: from");
     res.write("from ");
   }, 1000);
 
   setTimeout(() => {
+    console.log("📤 Sending: NexusFly!");
     res.write("NexusFly!");
     res.end();
   }, 2000);
