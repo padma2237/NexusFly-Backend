@@ -118,9 +118,36 @@ const sources =
   });
 }
   
-  
-  
 });
+
+
+
+app.post("/ask-stream", async (req, res) => {
+  res.setHeader("Content-Type", "text/plain");
+  
+  
+  
+  res.setHeader("Cache-Control", "no-cache");
+res.setHeader("Connection", "keep-alive");
+
+
+
+
+  res.setHeader("Transfer-Encoding", "chunked");
+
+  res.write("Hello ");
+  
+  setTimeout(() => {
+    res.write("from ");
+  }, 1000);
+
+  setTimeout(() => {
+    res.write("NexusFly!");
+    res.end();
+  }, 2000);
+});
+
+
 
 
 const PORT = process.env.PORT || 3000;
