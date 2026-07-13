@@ -123,6 +123,7 @@ const sources =
 
 
 app.post("/ask-stream", async (req, res) => {
+  console.log("🚀 /ask-stream called");
   res.setHeader("Content-Type", "text/plain");
   
   
