@@ -111,5 +111,35 @@ const answer = result.response.text();
 });
 
 
+app.post("/ask-stream", async (req, res) => {
+  try {
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+res.setHeader("Transfer-Encoding", "chunked");
+res.setHeader("Cache-Control", "no-cache");
+res.setHeader("Connection", "keep-alive");
+
+const words = [
+  "Hello",
+  " ",
+  "from",
+  " ",
+  "NexusFly",
+  "!",
+];
+
+for (const word of words) {
+  res.write(word);
+  await new Promise((resolve) => setTimeout(resolve, 300));
+}
+
+res.end();
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).end();
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
