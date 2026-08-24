@@ -40,37 +40,51 @@ app.post('/ask', async (req, res) => {
     let finalContents = contents;
 
     if (webSearch) {
-      const userQuery =
-      contents[contents.length - 1]?.parts?.[0]?.text || "";
+  const lastMessage =
+    contents[contents.length - 1];
 
-      searchResults = await searchWeb(userQuery);
+  const userQuery =
+    lastMessage?.parts
+      ?.find((part) => part.text)
+      ?.text || "";
 
-      const searchContext = `
-      Live Web Search Results:
+  searchResults =
+    await searchWeb(userQuery);
 
-      ${searchResults.results
-      .map(
-        (r, i) => `${i + 1}. ${r.title}
-        URL: ${r.url}
-        Summary: ${r.content}`
-      )
-      .join("\n\n")}
+  const searchContext = `
+Live Web Search Results:
 
-      Answer the user's question using the search results above.
+${searchResults.results
+  .map(
+    (r, i) => `${i + 1}. ${r.title}
+URL: ${r.url}
+Summary: ${r.content}`
+  )
+  .join("\n\n")}
 
-      User Question:
-      ${userQuery}
-      `;
+Answer the user's question using the search results above.
 
-      finalContents = [...contents];
+User Question:
+${userQuery}
+`;
 
-      finalContents[finalContents.length - 1] = {
-        role: "user",
-        parts: [{
-          text: searchContext
-        }]
-      };
-    }
+  finalContents = [...contents];
+
+  const imageParts =
+    lastMessage?.parts?.filter(
+      (part) => part.inlineData
+    ) || [];
+
+  finalContents[finalContents.length - 1] = {
+    role: "user",
+    parts: [
+      {
+        text: searchContext,
+      },
+      ...imageParts,
+    ],
+  };
+}
 
 const result = await model.generateContent({
   systemInstruction:
