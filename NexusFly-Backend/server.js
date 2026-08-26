@@ -30,30 +30,33 @@ app.get('/', (req, res) => {
 
 app.post('/ask', async (req, res) => {
   try {
-
     const {
-      contents, webSearch
+      contents,
+      webSearch
     } = req.body;
 
     console.log("Web Search:", webSearch);
 
     let searchResults = null;
-
     let finalContents = contents;
 
+    // =========================
+    // WEB SEARCH
+    // =========================
+
     if (webSearch) {
-  const lastMessage =
-    contents[contents.length - 1];
+      const lastMessage =
+        contents[contents.length - 1];
 
-  const userQuery =
-    lastMessage?.parts
-      ?.find((part) => part.text)
-      ?.text || "";
+      const userQuery =
+        lastMessage?.parts
+          ?.find((part) => part.text)
+          ?.text || "";
 
-  searchResults =
-    await searchWeb(userQuery);
+      searchResults =
+        await searchWeb(userQuery);
 
-  const searchContext = `
+      const searchContext = `
 Live Web Search Results:
 
 ${searchResults.results
@@ -70,43 +73,56 @@ User Question:
 ${userQuery}
 `;
 
-  finalContents = [...contents];
+      finalContents = [...contents];
 
-const attachmentParts =
-  lastMessage?.parts?.filter(
-    (part) => part.inlineData
-  ) || [];
+      const attachmentParts =
+        lastMessage?.parts?.filter(
+          (part) => part.inlineData
+        ) || [];
 
-finalContents[finalContents.length - 1] = {
-  role: "user",
-  parts: [
-    {
-      text: searchContext,
-    },
-    ...attachmentParts,
-  ],
-};
+      finalContents[finalContents.length - 1] = {
+        role: "user",
+        parts: [
+          {
+            text: searchContext,
+          },
+          ...attachmentParts,
+        ],
+      };
+    }
 
-const result = await model.generateContent({
-  systemInstruction:
-    "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.",
-  contents: finalContents,
-});
+    // =========================
+    // GEMINI
+    // =========================
 
-const answer = result.response.text();
-  
+    const result = await model.generateContent({
+      systemInstruction:
+        "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.",
+      contents: finalContents,
+    });
+
+    const answer = result.response.text();
+
+    // =========================
+    // SOURCES
+    // =========================
+
     const sources =
-    webSearch && searchResults?.results
-    ? searchResults.results.map(result => ({
-      title: result.title,
-      url: result.url,
-    })): [];
+      webSearch && searchResults?.results
+        ? searchResults.results.map(result => ({
+            title: result.title,
+            url: result.url,
+          }))
+        : [];
+
+    // =========================
+    // RESPONSE
+    // =========================
 
     res.json({
       answer,
-      sources
+      sources,
     });
-
 
   } catch (error) {
     console.error("Full API Error:");
@@ -121,7 +137,6 @@ const answer = result.response.text();
       error: "Failed to connect to AI",
     });
   }
-
 });
 
 
