@@ -10,11 +10,9 @@ const {
 } = require("./services/webSearch");
 
 
-
 app.use(cors());
-
 app.use(express.json({
-  limit: "10mb",
+  limit: "25mb",
 }));
 
 app.use(express.static("Public"));
@@ -24,8 +22,6 @@ const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 const model = genAI.getGenerativeModel({
   model: "gemini-3.1-flash-lite",
 });
-
-
 
 // Update your main route to send the index.html file
 app.get('/', (req, res) => {
@@ -76,21 +72,20 @@ ${userQuery}
 
   finalContents = [...contents];
 
-  const imageParts =
-    lastMessage?.parts?.filter(
-      (part) => part.inlineData
-    ) || [];
+const attachmentParts =
+  lastMessage?.parts?.filter(
+    (part) => part.inlineData
+  ) || [];
 
-  finalContents[finalContents.length - 1] = {
-    role: "user",
-    parts: [
-      {
-        text: searchContext,
-      },
-      ...imageParts,
-    ],
-  };
-}
+finalContents[finalContents.length - 1] = {
+  role: "user",
+  parts: [
+    {
+      text: searchContext,
+    },
+    ...attachmentParts,
+  ],
+};
 
 const result = await model.generateContent({
   systemInstruction:
@@ -100,7 +95,6 @@ const result = await model.generateContent({
 
 const answer = result.response.text();
   
-
     const sources =
     webSearch && searchResults?.results
     ? searchResults.results.map(result => ({
