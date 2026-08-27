@@ -28,6 +28,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'Public', 'index.html'));
 });
 
+
+
 app.post('/ask', async (req, res) => {
   try {
     const {
@@ -41,22 +43,117 @@ app.post('/ask', async (req, res) => {
     let finalContents = contents;
 
     // =========================
+    // LAST MESSAGE
+    // =========================
+
+    const lastMessage =
+      contents[contents.length - 1];
+
+    const userQuery =
+      lastMessage?.parts
+        ?.find((part) => part.text)
+        ?.text
+        ?.trim() || "";
+
+    const attachmentParts =
+      lastMessage?.parts?.filter(
+        (part) => part.inlineData
+      ) || [];
+
+    const hasImages =
+      attachmentParts.length > 0;
+
+    // =========================
     // WEB SEARCH
     // =========================
 
     if (webSearch) {
-      const lastMessage =
-        contents[contents.length - 1];
 
-      const userQuery =
-        lastMessage?.parts
-          ?.find((part) => part.text)
-          ?.text || "";
+      // ---------------------------------
+      // CASE 1:
+      // Normal text query
+      // ---------------------------------
 
-      searchResults =
-        await searchWeb(userQuery);
+      if (userQuery) {
 
-      const searchContext = `
+        console.log(
+          "Web search query:",
+          userQuery
+        );
+
+        searchResults =
+          await searchWeb(userQuery);
+
+      }
+
+      // ---------------------------------
+      // CASE 2:
+      // Image-only query
+      // ---------------------------------
+
+      else if (hasImages) {
+
+        console.log(
+          "Image-only web search detected."
+        );
+
+        const queryGenerationResult =
+          await model.generateContent({
+            systemInstruction: `
+You are a visual search-query generator.
+
+Analyze the supplied image only for information
+that can reasonably be determined from the image.
+
+Your task is to produce ONE concise web-search
+query that can help identify or research what is
+shown in the image.
+
+Important rules:
+- Do not invent facts.
+- Do not assume a current year.
+- Do not rely on your stored knowledge for current facts.
+- Use visible text, logos, labels, model numbers,
+  names, distinctive identifiers, or other reliable
+  visual clues.
+- If the exact identity is uncertain, use descriptive
+  search terms instead of pretending to know it.
+- Return ONLY the search query.
+- Do not explain your reasoning.
+`,
+            contents: [
+              {
+                role: "user",
+                parts: attachmentParts,
+              },
+            ],
+          });
+
+        const generatedQuery =
+          queryGenerationResult.response
+            .text()
+            .trim();
+
+        console.log(
+          "Generated image search query:",
+          generatedQuery
+        );
+
+        if (generatedQuery) {
+          searchResults =
+            await searchWeb(generatedQuery);
+        }
+      }
+
+      // ---------------------------------
+      // Add search results to final prompt
+      // ---------------------------------
+
+      if (
+        searchResults?.results?.length
+      ) {
+
+        const searchContext = `
 Live Web Search Results:
 
 ${searchResults.results
@@ -67,52 +164,58 @@ Summary: ${r.content}`
   )
   .join("\n\n")}
 
-Answer the user's question using the search results above.
+Use the live web search results above when
+answering the user's request.
 
-User Question:
-${userQuery}
+${userQuery
+  ? `User Question:
+${userQuery}`
+  : "The user provided an image without a written question."}
 `;
 
-      finalContents = [...contents];
+        finalContents = [...contents];
 
-      const attachmentParts =
-        lastMessage?.parts?.filter(
-          (part) => part.inlineData
-        ) || [];
-
-      finalContents[finalContents.length - 1] = {
-        role: "user",
-        parts: [
-          {
-            text: searchContext,
-          },
-          ...attachmentParts,
-        ],
-      };
+        finalContents[
+          finalContents.length - 1
+        ] = {
+          role: "user",
+          parts: [
+            {
+              text: searchContext,
+            },
+            ...attachmentParts,
+          ],
+        };
+      }
     }
 
     // =========================
     // GEMINI
     // =========================
 
-    const result = await model.generateContent({
-      systemInstruction:
-        "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.",
-      contents: finalContents,
-    });
+    const result =
+      await model.generateContent({
+        systemInstruction:
+          "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.",
+        contents: finalContents,
+      });
 
-    const answer = result.response.text();
+    const answer =
+      result.response.text();
 
     // =========================
     // SOURCES
     // =========================
 
     const sources =
-      webSearch && searchResults?.results
-        ? searchResults.results.map(result => ({
-            title: result.title,
-            url: result.url,
-          }))
+      webSearch &&
+      searchResults?.results
+        ? searchResults.results.map(
+            (result) => ({
+              title: result.title,
+              url: result.url,
+            })
+          )
         : [];
 
     // =========================
@@ -125,19 +228,27 @@ ${userQuery}
     });
 
   } catch (error) {
-    console.error("Full API Error:");
+
+    console.error(
+      "Full API Error:"
+    );
 
     if (error instanceof Error) {
-      console.error(error.message);
+      console.error(
+        error.message
+      );
     } else {
       console.error(error);
     }
 
     res.status(500).json({
-      error: "Failed to connect to AI",
+      error:
+        "Failed to connect to AI",
     });
   }
 });
+
+
 
 
 app.post("/ask-stream", async (req, res) => {
