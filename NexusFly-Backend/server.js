@@ -196,7 +196,7 @@ ${userQuery}`
     const result =
       await model.generateContent({
         systemInstruction:
-          "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.",
+          "You are Padmaria, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.",
         contents: finalContents,
       });
 
@@ -263,7 +263,7 @@ const words = [
   " ",
   "from",
   " ",
-  "NexusFly",
+  "Padmaria",
   "!",
 ];
 
