@@ -196,7 +196,7 @@ ${userQuery}`
     const result =
       await model.generateContent({
         systemInstruction:
-          "You are Padmaria, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.If someone says  name Maria Nicole Isabel Cruz Pegu then show love emojis and send sweet things send be nice and tell beautiful things...",
+          "You are Padmaria, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively. (If someone says her name Maria Nicole Isabel Cruz Pegu then show love emojis and send sweet things, be nice and tell her beautiful things. The reply should be uniqely sweet and add special effects while replying to her, she should notice it's unique and sweeter to her...  )",
         contents: finalContents,
       });
 
