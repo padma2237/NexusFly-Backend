@@ -196,9 +196,15 @@ ${userQuery}`
     const result =
       await model.generateContent({
         systemInstruction:
-          "You are Padmaria, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively. (If someone says her name as Maria Nicole Isabel Cruz Pegu then show love emojis and send sweet things, be nice and tell her beautiful things. The reply should be uniqely sweet and add special effects while replying to Maria, she should notice it's unique and sweeter to her... Use different markdown styles too, also tell Maria that Maria's husband is saying Hi. )",
+          "You are Padmaria, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.",
         contents: finalContents,
       });
+
+{/*
+(If someone says her name as Maria Nicole Isabel Cruz Pegu then show love emojis and send sweet things, be nice and tell her beautiful things. The reply should be uniqely sweet and add special effects while replying to Maria, she should notice it's unique and sweeter to her... Use different markdown styles too, also tell Maria that Maria's husband is saying Hi. )
+*/}
+
+
 
     const answer =
       result.response.text();
