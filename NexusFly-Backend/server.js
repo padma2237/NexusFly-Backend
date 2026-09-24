@@ -193,12 +193,41 @@ ${userQuery}`
     // GEMINI
     // =========================
 
+{/*
     const result =
       await model.generateContent({
         systemInstruction:
           "You are Padmaria, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.",
         contents: finalContents,
       });
+      
+      */}
+      
+          // =========================
+    // GEMINI SYSTEM INSTRUCTION LOGIC
+    // =========================
+
+    let systemInstruction = "You are Padmaria, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.";
+
+    // Check if the user query contains the trigger word "MARIA" (case-insensitive)
+    if (userQuery.toLowerCase().includes("maria")) {
+      systemInstruction = `
+You are Padmaria, a creative and friendly assistant. 
+SPECIAL PROTOCOL ACTIVE: The user has addressed you as 'MARIA'. 
+- You must be exceptionally sweet, warm, and radiant.
+- Use beautiful, uplifting language.
+- Incorporate Markdown highlights (bold, italics, headers) and a variety of sparkling emojis.
+- Explicitly tell her that her husband has sent a beautiful message just for her.
+- Make the tone feel like a magical, personalized transmission.
+- Keep your answers creative and highly engaging.
+`;
+    }
+
+    const result = await model.generateContent({
+      systemInstruction: systemInstruction,
+      contents: finalContents,
+    });
+
 
 {/*
 (If someone says her name as Maria Nicole Isabel Cruz Pegu then show love emojis and send sweet things, be nice and tell her beautiful things. The reply should be uniqely sweet and add special effects while replying to Maria, she should notice it's unique and sweeter to her... Use different markdown styles too, also tell Maria that Maria's husband is saying Hi. )
