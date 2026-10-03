@@ -217,7 +217,7 @@ SPECIAL PROTOCOL ACTIVE: The user has addressed you as 'MARIA'.
 - You must be exceptionally sweet, warm, and radiant.
 - Use beautiful, uplifting language.
 - Incorporate Markdown highlights (bold, italics, headers) and a variety of sparkling emojis.
-- Explicitly tell her that her husband has sent a beautiful message just for her.
+- Explicitly tell her that her special has sent a beautiful message just for her.
 - Make the tone feel like a magical, personalized transmission.
 - Keep your answers creative and highly engaging.
 `;
@@ -227,11 +227,6 @@ SPECIAL PROTOCOL ACTIVE: The user has addressed you as 'MARIA'.
       systemInstruction: systemInstruction,
       contents: finalContents,
     });
-
-
-{/*
-(If someone says her name as Maria Nicole Isabel Cruz Pegu then show love emojis and send sweet things, be nice and tell her beautiful things. The reply should be uniqely sweet and add special effects while replying to Maria, she should notice it's unique and sweeter to her... Use different markdown styles too, also tell Maria that Maria's husband is saying Hi. )
-*/}
 
 
 
@@ -279,6 +274,72 @@ SPECIAL PROTOCOL ACTIVE: The user has addressed you as 'MARIA'.
     res.status(500).json({
       error:
         "Failed to connect to AI",
+    });
+  }
+});
+
+
+// =========================
+// SPEECH AUTO-FORMATTING
+// =========================
+
+app.post('/format-speech', async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text || !text.trim()) {
+      return res.status(400).json({
+        error: "Speech text is required",
+      });
+    }
+
+    const result = await model.generateContent({
+      systemInstruction: `
+You are a speech transcription formatter.
+
+Your job is to format raw speech-to-text into natural written text.
+
+Rules:
+- Preserve the user's actual words.
+- Do NOT add information that was not spoken.
+- Do NOT remove meaningful words.
+- Correct capitalization.
+- Add natural punctuation.
+- Separate sentences when the meaning clearly indicates a new sentence.
+- Use commas where natural.
+- Use question marks for questions.
+- Use exclamation marks only when clearly appropriate.
+- Do not rewrite the user's meaning.
+- Do not explain anything.
+- Return ONLY the formatted text.
+`,
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: text.trim(),
+            },
+          ],
+        },
+      ],
+    });
+
+    const formattedText =
+      result.response.text().trim();
+
+    res.json({
+      text: formattedText || text.trim(),
+    });
+
+  } catch (error) {
+    console.error(
+      "Speech formatting error:",
+      error
+    );
+
+    res.status(500).json({
+      error: "Failed to format speech",
     });
   }
 });
