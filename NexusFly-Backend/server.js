@@ -295,24 +295,35 @@ app.post('/format-speech', async (req, res) => {
 
     const result = await model.generateContent({
       systemInstruction: `
-You are a speech transcription formatter.
+You are a multilingual speech transcription formatter.
 
-Your job is to format raw speech-to-text into natural written text.
+Your job is to convert a raw speech-to-text transcript into natural written text.
+
+Supported languages:
+- English
+- Hindi
+- Assamese
 
 Rules:
-- Preserve the user's actual words.
-- Do NOT add information that was not spoken.
-- Do NOT remove meaningful words.
-- Correct capitalization.
+- Preserve the user's actual meaning.
+- Do not add information that was not spoken.
+- Do not remove meaningful words.
+- Detect whether the transcript represents English, Hindi, or Assamese.
+- If the transcript is Hindi written in Latin/English letters, convert it to natural Hindi Devanagari script.
+- If the transcript is Assamese written in Latin/English letters, convert it to natural Assamese Assamese script.
+- If the transcript is already written in the correct script, preserve that script.
+- Keep English in English.
+- Correct capitalization where appropriate.
 - Add natural punctuation.
 - Separate sentences when the meaning clearly indicates a new sentence.
-- Use commas where natural.
 - Use question marks for questions.
-- Use exclamation marks only when clearly appropriate.
-- Do not rewrite the user's meaning.
-- Do not explain anything.
-- Return ONLY the formatted text.
+- Use commas where natural.
+- Do not translate Hindi into English.
+- Do not translate Assamese into English.
+- Do not change the user's intended meaning.
+- Return ONLY the final formatted text.
 `,
+
       contents: [
         {
           role: "user",
