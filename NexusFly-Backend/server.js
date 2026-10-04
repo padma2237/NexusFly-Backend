@@ -4,11 +4,16 @@ const cors = require('cors');
 const path = require('path');
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 const app = express();
+
 const {
   searchWeb
 } = require("./services/webSearch");
 
+const {
+  transcribeSpeech,
+} = require("./services/speechTranscription");
 
 app.use(cors());
 app.use(express.json({
@@ -351,6 +356,54 @@ Rules:
 
     res.status(500).json({
       error: "Failed to format speech",
+    });
+  }
+});
+
+
+
+// =========================
+// SPEECH TRANSCRIPTION
+// =========================
+
+app.post("/transcribe-speech", async (req, res) => {
+  try {
+    const {
+      audio,
+      mimeType,
+    } = req.body;
+
+    if (!audio) {
+      return res.status(400).json({
+        error: "Audio data is required",
+      });
+    }
+
+    if (!mimeType) {
+      return res.status(400).json({
+        error: "Audio MIME type is required",
+      });
+    }
+
+    const text =
+      await transcribeSpeech(
+        audio,
+        mimeType
+      );
+
+    res.json({
+      text,
+    });
+
+  } catch (error) {
+    console.error(
+      "Speech transcription error:",
+      error
+    );
+
+    res.status(500).json({
+      error:
+        "Failed to transcribe speech",
     });
   }
 });
