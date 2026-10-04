@@ -50,14 +50,21 @@ Transcribe this audio exactly as spoken.
 Requirements:
 - Automatically detect the spoken language.
 - Preserve the original language.
-- If the speaker uses Assamese, return Assamese script.
-- If the speaker uses Hindi, return Devanagari Hindi.
-- If the speaker uses English, return English.
-- Preserve the speaker's actual meaning.
+
+Language/script rules:
+- Assamese speech MUST be returned in Assamese Unicode script.
+- NEVER return Assamese speech in Roman/Latin letters.
+- Hindi speech MUST be returned in Devanagari script.
+- NEVER return Hindi speech in Roman/Latin letters.
+- English speech MUST be returned in English.
+
+- Preserve the speaker's actual words and meaning.
 - Do not translate the speech into another language.
 - Add natural punctuation and capitalization.
 - Do not add information that was not spoken.
-- Return only the transcription.
+- Return only the final transcription.
+
+
           `,
         },
       ],
