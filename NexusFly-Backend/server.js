@@ -25,7 +25,9 @@ app.use(express.static("Public"));
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-3.1-flash-lite",
+  model: // "gemini-3.1-flash-lite", 
+  "gemini-3.8-flash",
+  
 });
 
 // Update your main route to send the index.html file
@@ -212,12 +214,12 @@ ${userQuery}`
     // GEMINI SYSTEM INSTRUCTION LOGIC
     // =========================
 
-    let systemInstruction = "You are Padmaria, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.";
+    let systemInstruction = "You are NexusFly, a creative and friendly assistant. Never introduce yourself repeatedly. Answer the user's questions directly and creatively.";
 
     // Check if the user query contains the trigger word "MARIA" (case-insensitive)
     if (userQuery.toLowerCase().includes("maria")) {
       systemInstruction = `
-You are Padmaria, a creative and friendly assistant. 
+You are NexusFly, a creative and friendly assistant. 
 SPECIAL PROTOCOL ACTIVE: The user has addressed you as 'MARIA'. 
 - You must be exceptionally sweet, warm, and radiant.
 - Use beautiful, uplifting language.
@@ -423,7 +425,7 @@ const words = [
   " ",
   "from",
   " ",
-  "Padmaria",
+  "NexusFly",
   "!",
 ];
 
